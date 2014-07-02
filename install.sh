@@ -164,7 +164,6 @@ else
 fi
 cat<<'EOF'>>/mnt/gentoo/chroot.sh
 grub2-mkconfig -o /boot/grub/grub.cfg
-passwd
 EOF
 chmod a+x chroot.sh
 chroot /mnt/gentoo /chroot.sh
