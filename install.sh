@@ -16,9 +16,9 @@ trap 'cleanup' ERR
 echo 'Hello, Gentoo!'
 cleanup
 
-declare FILENAME_STAGE3="$(curl -L http://ftp.iij.ad.jp/pub/linux/gentoo/releases/amd64/current-iso/ | grep -E 'href="stage3-amd64-[0-9]+.tar.bz2"' | sed -e 's/.*href="//' | sed -e 's/">.*$//')"
-
-declare CPU_CORES=$(grep -c -E '^processor\s+' /proc/cpuinfo)
+declare PATHNAME_STAGE3="$(curl -L ftp://ftp.iij.ad.jp/pub/linux/gentoo/releases/amd64/autobuilds/latest-stage3-amd64.txt | tail -1)"
+declare DIRNAME_STAGE3="$(dirname ${PATHNAME_STAGE3})"
+declare FILENAME_STAGE3="$(basename ${PATHNAME_STAGE3})"
 
 declare BOOT_FROM_UEFI=false
 if [ $(dmesg|grep -E '\s+EFI\s+v[0-9]+\.[0-9]+' -q) ]; then
@@ -37,10 +37,10 @@ if [ 8 -ge $(free -g|grep -E '^Mem:'|tr -s ' '|cut -d' ' -f2) ]; then
   PARTITION_SWAP_SIZE="4G"
 fi
 
-#if [ -z "${ROOT_PARTITION}" ]; then
-#  echo -n "root partition:"
-#  read ROOT_PARTITION
-#fi
+if [ -b "${ROOT_PARTITION}" ]; then
+  echo -n "Please type target device(e.g. /dev/vda):"
+  read ROOT_PARTITION
+fi
 
 # create paritions
 
@@ -124,7 +124,7 @@ SYNC="rsync://rsync.jp.gentoo.org/gentoo-portage"
 GENTOO_MIRRORS="ftp://ftp.iij.ad.jp/pub/linux/gentoo/ http://ftp.iij.ad.jp/pub/linux/gentoo/ rsync://ftp.iij.ad.jp/pub/linux/gentoo/"
 GRUB_PLATFORMS="emu efi-64 efi-32 pc"
 EOF
-echo " MAKEOPTS=\"-j$((${CPU_CORES}+2))\"" >> /mnt/gentoo/etc/portage/make.conf
+echo " MAKEOPTS=\"-j$(($(nproc)+2))\"" >> /mnt/gentoo/etc/portage/make.conf
 
 cat<<'EOF'>/mnt/gentoo/etc/locale.gen
 en_US ISO-8859-1
@@ -156,7 +156,7 @@ export PS1="(chroot)$PS1"
 emerge --sync -q
 emerge -uvq genkernel gentoo-sources gentoolkit linux-firmware grub btrfs-progs xfsprogs vim zsh tmux
 EOF
-echo "genkernel --makeopts=-j$((${CPU_CORES}+2)) all" >> /mnt/gentoo/chroot.sh
+echo "genkernel --makeopts=-j$(($(nproc)+2)) all" >> /mnt/gentoo/chroot.sh
 if [ $BOOT_FROM_UEFI ];then
   echo 'grub2-install --target=x86_64-efi' >> /mnt/gentoo/chroot.sh
 else
