@@ -25,7 +25,9 @@ if [ $(dmesg|grep -E '\s+EFI\s+v[0-9]+\.[0-9]+' -q) ]; then
   BOOT_FROM_UEFI=true
 fi
 
-declare TARGET_DEVICE="/dev/sda"
+if [ -z "${TARGET_DEVICE}" ]; then
+  declare TARGET_DEVICE="/dev/sda"
+fi
 declare PARTITION_BOOT_SIZE="4M"
 declare PARTITION_BOOT_TYPE="ef02"
 if [ $BOOT_FROM_UEFI ];then
