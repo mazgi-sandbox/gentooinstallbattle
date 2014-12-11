@@ -80,33 +80,33 @@ EOF
 # format filesystems
 
 if [ $BOOT_FROM_UEFI ];then
-  mkfs.vfat -F32 /dev/sda1
+  mkfs.vfat -F32 ${TARGET_DEVICE}1
 else
-  mkfs.vfat /dev/sda1
+  mkfs.vfat ${TARGET_DEVICE}1
 fi
 
-mkswap /dev/sda2
+mkswap ${TARGET_DEVICE}2
 
-mkfs.btrfs -f /dev/sda3
+mkfs.btrfs -f ${TARGET_DEVICE}3
 
-mkdir -p /mnt/btrfs && mount /dev/sda3 /mnt/btrfs && cd /mnt/btrfs
+mkdir -p /mnt/btrfs && mount ${TARGET_DEVICE}3 /mnt/btrfs && cd /mnt/btrfs
 btrfs subvolume create gentoo
 btrfs subvolume create usr-portage
 btrfs subvolume create var
 btrfs subvolume create var-log
 
-mount -odefaults,subvol=gentoo,compress=lzo,autodefrag /dev/sda3 /mnt/gentoo
+mount -odefaults,subvol=gentoo,compress=lzo,autodefrag ${TARGET_DEVICE}3 /mnt/gentoo
 cd /mnt/gentoo
 if [ $BOOT_FROM_UEFI ];then
   mkdir -p boot/efi
-  mount /dev/sda1 /mnt/gentoo/boot/efi
+  mount ${TARGET_DEVICE}1 /mnt/gentoo/boot/efi
 fi
 mkdir -p usr/portage var
 
-mount -odefaults,subvol=usr-portage,compress=lzo,autodefrag /dev/sda3 /mnt/gentoo/usr/portage
-mount -odefaults,subvol=var,compress=lzo,autodefrag /dev/sda3 /mnt/gentoo/var
+mount -odefaults,subvol=usr-portage,compress=lzo,autodefrag ${TARGET_DEVICE}3 /mnt/gentoo/usr/portage
+mount -odefaults,subvol=var,compress=lzo,autodefrag ${TARGET_DEVICE}3 /mnt/gentoo/var
 mkdir -p /mnt/gentoo/var/log
-mount -odefaults,subvol=var-log,compress=gzip,autodefrag /dev/sda3 /mnt/gentoo/var/log
+mount -odefaults,subvol=var-log,compress=gzip,autodefrag ${TARGET_DEVICE}3 /mnt/gentoo/var/log
 
 curl -LO "ftp://ftp.iij.ad.jp/pub/linux/gentoo/snapshots/portage-latest.tar.xz"
 curl -LO "ftp://ftp.iij.ad.jp/pub/linux/gentoo/releases/amd64/current-iso/${FILENAME_STAGE3}"
@@ -145,15 +145,15 @@ ja_JP.UTF-8 UTF-8
 ja_JP EUC-JP
 EOF
 
-cat<<'EOF'>/mnt/gentoo/etc/fstab
-/dev/sda3               /               btrfs           defaults,subvol=gentoo,compress=lzo,autodefrag  0 1
-/dev/sda3               /usr/portage    btrfs           defaults,subvol=usr-portage,compress=lzo,autodefrag     0 1
-/dev/sda3               /var            btrfs           defaults,subvol=var,compress=lzo,autodefrag     0 1
-/dev/sda3               /var/log        btrfs           defaults,subvol=var-log,compress=gzip,autodefrag        0 1
-/dev/sda2               none            swap            sw              0 0
+cat<<EOF>/mnt/gentoo/etc/fstab
+${TARGET_DEVICE}3               /               btrfs           defaults,subvol=gentoo,compress=lzo,autodefrag  0 1
+${TARGET_DEVICE}3               /usr/portage    btrfs           defaults,subvol=usr-portage,compress=lzo,autodefrag     0 1
+${TARGET_DEVICE}3               /var            btrfs           defaults,subvol=var,compress=lzo,autodefrag     0 1
+${TARGET_DEVICE}3               /var/log        btrfs           defaults,subvol=var-log,compress=gzip,autodefrag        0 1
+${TARGET_DEVICE}2               none            swap            sw              0 0
 EOF
 if [ $BOOT_FROM_UEFI ];then
-  echo '/dev/sda1               /boot/efi       vfat            defaults        0 1' >> /mnt/gentoo/etc/fstab
+  echo '${TARGET_DEVICE}1               /boot/efi       vfat            defaults        0 1' >> /mnt/gentoo/etc/fstab
 fi
 
 cat /etc/resolv.conf > /mnt/gentoo/etc/resolv.conf
