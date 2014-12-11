@@ -16,13 +16,16 @@ trap 'cleanup' ERR
 echo 'Hello, Gentoo!'
 cleanup
 
+if [ -z "${ROOT_PASSWORD}" ]; then
+  declare ROOT_PASSWORD="root"
+fi
+
 declare PATHNAME_STAGE3="$(curl -L ftp://ftp.iij.ad.jp/pub/linux/gentoo/releases/amd64/autobuilds/latest-stage3-amd64.txt | tail -1)"
 declare DIRNAME_STAGE3="$(dirname ${PATHNAME_STAGE3})"
 declare FILENAME_STAGE3="$(basename ${PATHNAME_STAGE3})"
 
-declare BOOT_FROM_UEFI=false
 if [ $(dmesg|grep -E '\s+EFI\s+v[0-9]+\.[0-9]+' -q) ]; then
-  BOOT_FROM_UEFI=true
+  declare BOOT_FROM_UEFI="yes"
 fi
 
 if [ -z "${TARGET_DEVICE}" ]; then
@@ -30,7 +33,7 @@ if [ -z "${TARGET_DEVICE}" ]; then
 fi
 declare PARTITION_BOOT_SIZE="4M"
 declare PARTITION_BOOT_TYPE="ef02"
-if [ $BOOT_FROM_UEFI ];then
+if [ ${BOOT_FROM_UEFI} ];then
   PARTITION_BOOT_SIZE="512M"
   PARTITION_BOOT_TYPE="ef00"
 fi
