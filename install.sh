@@ -25,7 +25,7 @@ if [ $(dmesg|grep -E '\s+EFI\s+v[0-9]+\.[0-9]+' -q) ]; then
   BOOT_FROM_UEFI=true
 fi
 
-declare ROOT_PARTITION="/dev/sda"
+declare TARGET_DEVICE="/dev/sda"
 declare PARTITION_BOOT_SIZE="4M"
 declare PARTITION_BOOT_TYPE="ef02"
 if [ $BOOT_FROM_UEFI ];then
@@ -37,14 +37,22 @@ if [ 8 -ge $(free -g|grep -E '^Mem:'|tr -s ' '|cut -d' ' -f2) ]; then
   PARTITION_SWAP_SIZE="4G"
 fi
 
-if [ ! -b "${ROOT_PARTITION}" ]; then
-  echo -n "Please type target device(e.g. /dev/vda):"
-  read ROOT_PARTITION
+if [ ! -b "${TARGET_DEVICE}" ]; then
+  echo -n "Please type target device(e.g. /dev/vda): "
+  while read device_path
+  do
+    if [ -b "${device_path}" ]; then
+      TARGET_DEVICE=${device_path}
+      break
+    else
+      echo -n "Device not fount. retype target device: "
+    fi
+  done
 fi
 
 # create paritions
 
-gdisk ${ROOT_PARTITION}<<EOF
+gdisk ${TARGET_DEVICE}<<EOF
 o
 y
 n
@@ -160,7 +168,7 @@ echo "genkernel --makeopts=-j$(($(nproc)+2)) all" >> /mnt/gentoo/chroot.sh
 if [ $BOOT_FROM_UEFI ];then
   echo 'grub2-install --target=x86_64-efi' >> /mnt/gentoo/chroot.sh
 else
-  echo "grub2-install ${ROOT_PARTITION}" >> /mnt/gentoo/chroot.sh
+  echo "grub2-install ${TARGET_DEVICE}" >> /mnt/gentoo/chroot.sh
 fi
 cat<<'EOF'>>/mnt/gentoo/chroot.sh
 grub2-mkconfig -o /boot/grub/grub.cfg
