@@ -39,8 +39,9 @@ fi
 
 if [ ! -b "${TARGET_DEVICE}" ]; then
   echo -n "Please type target device(e.g. /dev/vda): "
-  while read device_path
+  while true
   do
+    read device_path
     if [ -b "${device_path}" ]; then
       TARGET_DEVICE=${device_path}
       break
