@@ -162,7 +162,9 @@ fi
 cat /etc/resolv.conf > /mnt/gentoo/etc/resolv.conf
 cat /mnt/gentoo/usr/share/zoneinfo/Japan > /mnt/gentoo/etc/localtime
 
-cat<<'EOF'>/mnt/gentoo/chroot.sh
+rm -f /mnt/gentoo/chroot.sh
+echo "echo \"root:${ROOT_PASSWORD}\" | chpasswd" >> /mnt/gentoo/chroot.sh
+cat<<'EOF'>>/mnt/gentoo/chroot.sh
 #!/bin/bash -e
 env-update
 source /etc/profile
