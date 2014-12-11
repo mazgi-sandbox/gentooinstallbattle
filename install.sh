@@ -1,15 +1,15 @@
 #!/bin/bash -eu
 
 function cleanup() {
-umount -fl /mnt/gentoo/proc || true
-umount -fl /mnt/gentoo/dev || true
-umount -fl /mnt/gentoo/sys || true
-umount -f /mnt/gentoo/boot/efi || true
-umount -f /mnt/gentoo/usr/portage || true
-umount -f /mnt/gentoo/var/log || true
-umount -f /mnt/gentoo/var || true
-umount -fl /mnt/gentoo || true
-umount -fl /mnt/btrfs || true
+umount -fl /mnt/gentoo/proc 2> /dev/null || true
+umount -fl /mnt/gentoo/dev 2> /dev/null || true
+umount -fl /mnt/gentoo/sys 2> /dev/null || true
+umount -f /mnt/gentoo/boot/efi 2> /dev/null || true
+umount -f /mnt/gentoo/usr/portage 2> /dev/null || true
+umount -f /mnt/gentoo/var/log 2> /dev/null || true
+umount -f /mnt/gentoo/var 2> /dev/null || true
+umount -fl /mnt/gentoo 2> /dev/null || true
+umount -fl /mnt/btrfs 2> /dev/null || true
 }
 trap 'cleanup' ERR
 
