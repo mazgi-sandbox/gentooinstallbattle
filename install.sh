@@ -37,7 +37,7 @@ if [ 8 -ge $(free -g|grep -E '^Mem:'|tr -s ' '|cut -d' ' -f2) ]; then
   PARTITION_SWAP_SIZE="4G"
 fi
 
-if [ -b "${ROOT_PARTITION}" ]; then
+if [ ! -b "${ROOT_PARTITION}" ]; then
   echo -n "Please type target device(e.g. /dev/vda):"
   read ROOT_PARTITION
 fi
